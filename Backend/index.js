@@ -20,6 +20,7 @@ const billingRoutes = require('./routes/billing');
 const admissionRoutes = require('./routes/admissions');
 const bedRoutes = require('./routes/beds');
 const queueRoutes = require('./routes/queue');
+const xrayRoutes = require('./routes/xrays');
 const labRequestRoutes = require('./routes/labrequests');
 
 const contactRoutes = require('./routes/contact');
@@ -34,6 +35,7 @@ app.use(helmet());
 app.use(cors({
   origin: [
     'http://localhost:5173',
+    'https://mora-care-hms.vercel.app',
     'https://apex-frontend-sage.vercel.app'
   ],
   credentials: true
@@ -65,6 +67,7 @@ app.use('/api/billing', billingRoutes);
 app.use('/api/admissions', admissionRoutes);
 app.use('/api/beds', bedRoutes);
 app.use('/api/queue', queueRoutes);
+app.use('/api/xrays', xrayRoutes);
 app.use('/api/lab-requests', labRequestRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 app.use('/api/payments', require('./routes/payments'));
