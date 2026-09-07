@@ -1,18 +1,22 @@
-
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
+require('dotenv').config();
 const prisma = new PrismaClient();
 
 async function main() {
-  const adminUsername = "mora_care"; 
-  const adminPassword = "Mathokesm6$"; 
-  
+  const adminUsername = process.env.ADMIN_USERNAME;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminUsername || !adminPassword) {
+    throw new Error('Set ADMIN_USERNAME and ADMIN_PASSWORD in your .env before running this script.');
+  }
+
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
   // Use superAdmin (camelCase) to match Prisma's generation rules
   const admin = await prisma.superAdmin.upsert({
     where: { username: adminUsername },
-    update: {},
+    update: { passwordHash: hashedPassword }, // re-running updates the password too
     create: {
       username: adminUsername,
       passwordHash: hashedPassword,

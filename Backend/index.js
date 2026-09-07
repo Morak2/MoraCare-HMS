@@ -75,6 +75,31 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/platform', platformStatsRoutes);
 app.use('/api/notifications', require('./routes/notifications'));
 
+// TEMPORARY — one-time admin seed route, protected by a secret query param.
+// Remove this after use.
+app.get('/api/dev/seed-admin', async (req, res) => {
+  try {
+    if (req.query.secret !== process.env.SEED_SECRET) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    const bcrypt = require('bcryptjs');
+    const adminUsername = process.env.ADMIN_USERNAME;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+    if (!adminUsername || !adminPassword) {
+      return res.status(400).json({ error: 'ADMIN_USERNAME / ADMIN_PASSWORD not set in environment' });
+    }
+    const hashedPassword = await bcrypt.hash(adminPassword, 10);
+    const admin = await prisma.superAdmin.upsert({
+      where: { username: adminUsername },
+      update: { passwordHash: hashedPassword },
+      create: { username: adminUsername, passwordHash: hashedPassword },
+    });
+    return res.json({ message: 'Super Admin created/verified', username: admin.username });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
