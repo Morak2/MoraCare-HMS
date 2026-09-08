@@ -65,6 +65,7 @@ export default function Patients({ isDark, t, hospital, isMobile, externalSearch
     const [error,        setError]     = useState('');
     const [search,       setSearch]    = useState(externalSearch);
     const [showRegister, setShowReg]   = useState(false);   // controls register modal
+    const [newCredentials, setNewCredentials] = useState(null); // {email, tempPassword} shown once after registering a patient
     const [viewPatient,  setViewPatient] = useState(null);  // patient being viewed
     const [submitting,   setSubmitting] = useState(false);
     const [formError,    setFormError] = useState('');
@@ -158,9 +159,12 @@ export default function Patients({ isDark, t, hospital, isMobile, externalSearch
             setShowReg(false);
             setForm({ fullName: '', dateOfBirth: '', gender: 'male', phone: '', email: '', address: '', bloodGroup: 'O+', medicalConditions: '', nextOfKinName: '', nextOfKinPhone: '' });
             loadPatients();
-            showToast(res.patient?.email
-                ? 'Patient registered! Login details have been sent to their email.'
-                : 'Patient registered! No email was provided, so no login details were sent.');
+            if (res.patient?.email) {
+                setNewCredentials({ email: res.patient.email, tempPassword: res.tempPassword });
+                showToast('✅ Patient registered! Save their login details from the box shown.');
+            } else {
+                showToast('Patient registered! No email was provided, so they won\'t be able to log in to the patient portal.');
+            }
         } catch (err) {
             setFormError('Registration failed. Please check your details and try again.');
         } finally {
@@ -358,6 +362,39 @@ export default function Patients({ isDark, t, hospital, isMobile, externalSearch
                             </tbody>
                         </table>
                     )}
+                </div>
+            )}
+
+            {/* ── New Patient Credentials modal (shown once, since email may not be configured) ── */}
+            {newCredentials && (
+                <div onClick={e => e.target === e.currentTarget && setNewCredentials(null)} style={overlayStyle(isMobile)}>
+                    <div style={cardStyle(440)}>
+                        <div style={{ padding: '16px 20px', borderBottom: `1px solid ${t.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: t.card, borderRadius: '20px 20px 0 0' }}>
+                            <div style={{ fontWeight: 700, fontSize: 16, color: t.text }}>Patient Portal Login Details</div>
+                            <button onClick={() => setNewCredentials(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.textSub }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div style={{ padding: 20 }}>
+                            <p style={{ fontSize: 13, color: t.textSub, marginBottom: 16 }}>
+                                Share these with the patient so they can log in to their portal. This is shown only once — an email was also attempted, but if it doesn't arrive, use these instead.
+                            </p>
+                            <div style={{ background: t.bg, border: `1px solid ${t.border}`, borderRadius: 12, padding: 14, marginBottom: 8 }}>
+                                <div style={{ fontSize: 12, color: t.textSub, marginBottom: 4 }}>Email</div>
+                                <div style={{ fontSize: 14, fontWeight: 600, color: t.text, fontFamily: 'monospace' }}>{newCredentials.email}</div>
+                            </div>
+                            <div style={{ background: t.bg, border: `1px solid ${t.border}`, borderRadius: 12, padding: 14 }}>
+                                <div style={{ fontSize: 12, color: t.textSub, marginBottom: 4 }}>Temporary Password</div>
+                                <div style={{ fontSize: 14, fontWeight: 600, color: t.text, fontFamily: 'monospace' }}>{newCredentials.tempPassword}</div>
+                            </div>
+                            <button
+                                onClick={() => setNewCredentials(null)}
+                                style={{ marginTop: 16, width: '100%', padding: '10px 0', borderRadius: 10, border: 'none', background: T.orange, color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                Done
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 
