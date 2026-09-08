@@ -1,10 +1,4 @@
-/**
- * StaffDashboard.jsx
- * ──────────────────
- * Main dashboard for all hospital staff roles (doctor, nurse, pharmacist,
- * lab_staff, receptionist). Handles routing between sections, theming,
- * mobile layout, search, and authentication guard.
- */
+
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -91,10 +85,7 @@ const api = {
     },
 };
 
-/* ─────────────────────────────────────────────────────────────
-   DESIGN TOKENS
-   All colors, gradients, and role-specific styles live here.
-───────────────────────────────────────────────────────────── */
+
 const NAVY = '#0A1A3F';
 const SOFT_NAVY = '#1F2A44';
 const ORANGE = '#FF5A1F';
@@ -104,11 +95,11 @@ const BLUE = '#3b5bdb', BLUE2 = '#4c6ef5', EMERALD = '#059669', AMBER = '#d97706
 
 /** Per-role branding: icon, color, gradient, and tag shown in the UI */
 const ROLE_META = {
-    doctor:       { label: 'Doctor',       accent: BLUE,   accent2: BLUE2,    icon: Stethoscope, gradient: `linear-gradient(135deg,#3b5bdb,#4c6ef5)`, tag: 'DR'  },
-    nurse:        { label: 'Nurse',        accent: EMERALD, accent2: '#10b981', icon: Heart,       gradient: `linear-gradient(135deg,#059669,#10b981)`, tag: 'RN'  },
-    pharmacist:   { label: 'Pharmacist',   accent: VIOLET, accent2: '#8b5cf6', icon: Pill,        gradient: `linear-gradient(135deg,#7c3aed,#8b5cf6)`, tag: 'RPh' },
-    lab_staff:    { label: 'Lab Staff',    accent: CYAN,   accent2: '#06b6d4', icon: Microscope,  gradient: `linear-gradient(135deg,#0891b2,#06b6d4)`, tag: 'MLT' },
-    receptionist: { label: 'Receptionist', accent: AMBER,  accent2: '#f59e0b', icon: PhoneCall,   gradient: `linear-gradient(135deg,#d97706,#f59e0b)`, tag: 'RCP' },
+    doctor: { label: 'Doctor', accent: BLUE, accent2: BLUE2, icon: Stethoscope, gradient: `linear-gradient(135deg,#3b5bdb,#4c6ef5)`, tag: 'DR' },
+    nurse: { label: 'Nurse', accent: EMERALD, accent2: '#10b981', icon: Heart, gradient: `linear-gradient(135deg,#059669,#10b981)`, tag: 'RN' },
+    pharmacist: { label: 'Pharmacist', accent: VIOLET, accent2: '#8b5cf6', icon: Pill, gradient: `linear-gradient(135deg,#7c3aed,#8b5cf6)`, tag: 'RPh' },
+    lab_staff: { label: 'Lab Staff', accent: CYAN, accent2: '#06b6d4', icon: Microscope, gradient: `linear-gradient(135deg,#0891b2,#06b6d4)`, tag: 'MLT' },
+    receptionist: { label: 'Receptionist', accent: AMBER, accent2: '#f59e0b', icon: PhoneCall, gradient: `linear-gradient(135deg,#d97706,#f59e0b)`, tag: 'RCP' },
 };
 
 /** Light and dark theme color maps applied throughout the UI */
@@ -129,19 +120,19 @@ const themes = {
 
 /** Badge colors keyed by appointment/prescription status */
 const STATUS_COLORS = {
-    scheduled: { bg: 'rgba(217,119,6,0.12)',  color: AMBER,   label: 'Scheduled' },
-    completed: { bg: 'rgba(5,150,105,0.12)',  color: EMERALD, label: 'Completed' },
-    cancelled: { bg: 'rgba(225,29,72,0.12)',  color: ROSE,    label: 'Cancelled' },
-    active:    { bg: 'rgba(5,150,105,0.12)',  color: EMERALD, label: 'Active'    },
-    no_show:   { bg: 'rgba(107,114,128,0.12)', color: '#6b7280', label: 'No Show' },
+    scheduled: { bg: 'rgba(217,119,6,0.12)', color: AMBER, label: 'Scheduled' },
+    completed: { bg: 'rgba(5,150,105,0.12)', color: EMERALD, label: 'Completed' },
+    cancelled: { bg: 'rgba(225,29,72,0.12)', color: ROSE, label: 'Cancelled' },
+    active: { bg: 'rgba(5,150,105,0.12)', color: EMERALD, label: 'Active' },
+    no_show: { bg: 'rgba(107,114,128,0.12)', color: '#6b7280', label: 'No Show' },
 };
 
 /** Tag colors for medical record types */
 const TYPE_COLORS = {
-    lab_results:  { bg: 'rgba(6,182,212,0.15)',  text: '#22d3ee', label: 'Lab Results'  },
+    lab_results: { bg: 'rgba(6,182,212,0.15)', text: '#22d3ee', label: 'Lab Results' },
     consultation: { bg: 'rgba(59,130,246,0.15)', text: '#60a5fa', label: 'Consultation' },
-    imaging:      { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Imaging'      },
-    other:        { bg: 'rgba(139,92,246,0.15)', text: '#a78bfa', label: 'Other'        },
+    imaging: { bg: 'rgba(245,158,11,0.15)', text: '#fbbf24', label: 'Imaging' },
+    other: { bg: 'rgba(139,92,246,0.15)', text: '#a78bfa', label: 'Other' },
 };
 
 /** Rotating palette for patient/staff avatar backgrounds */
@@ -150,9 +141,7 @@ const AVATAR_COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#
 /** Returns up to 2 uppercase initials from a full name string */
 const initials = (name) => !name ? '??' : name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
-/* ─────────────────────────────────────────────────────────────
-   SHARED UI COMPONENTS
-───────────────────────────────────────────────────────────── */
+
 
 /** Colored status pill (Scheduled / Completed / Cancelled / etc.) */
 function Badge({ status }) {
@@ -176,17 +165,13 @@ function LoadingState({ t, accent }) {
     );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   PATIENTS SECTION
-   Read-only list for most roles. Supports live search with
-   350ms debounce. Clicking a patient opens a detail modal.
-───────────────────────────────────────────────────────────── */
+
 function PatientsSection({ t, hospitalId, accent, externalSearch = '' }) {
-    const [patients, setPatients]     = useState([]);
-    const [loading, setLoading]       = useState(true);
-    const [search, setSearch]         = useState(externalSearch);
+    const [patients, setPatients] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState(externalSearch);
     const [viewPatient, setViewPatient] = useState(null);
-    const [error, setError]           = useState('');
+    const [error, setError] = useState('');
 
     // Keep internal search in sync when parent passes a new external search term
     useEffect(() => { setSearch(externalSearch); }, [externalSearch]);
@@ -319,15 +304,15 @@ function PatientsSection({ t, hospitalId, accent, externalSearch = '' }) {
                         <div style={{ padding: 20 }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                                 {[
-                                    { label: 'Phone',        value: viewPatient.phone },
-                                    { label: 'Email',        value: viewPatient.email || '—' },
-                                    { label: 'Gender',       value: viewPatient.gender },
-                                    { label: 'Blood Group',  value: viewPatient.bloodGroup || '—' },
+                                    { label: 'Phone', value: viewPatient.phone },
+                                    { label: 'Email', value: viewPatient.email || '—' },
+                                    { label: 'Gender', value: viewPatient.gender },
+                                    { label: 'Blood Group', value: viewPatient.bloodGroup || '—' },
                                     { label: 'Date of Birth', value: new Date(viewPatient.dateOfBirth).toLocaleDateString() },
-                                    { label: 'Conditions',   value: viewPatient.medicalConditions || '—' },
-                                    { label: 'Next of Kin',  value: viewPatient.nextOfKinName || '—' },
-                                    { label: 'Kin Phone',    value: viewPatient.nextOfKinPhone || '—' },
-                                    { label: 'Address',      value: viewPatient.address, full: true },
+                                    { label: 'Conditions', value: viewPatient.medicalConditions || '—' },
+                                    { label: 'Next of Kin', value: viewPatient.nextOfKinName || '—' },
+                                    { label: 'Kin Phone', value: viewPatient.nextOfKinPhone || '—' },
+                                    { label: 'Address', value: viewPatient.address, full: true },
                                 ].map(({ label, value, full }) => (
                                     <div key={label} style={{ gridColumn: full ? '1/-1' : 'auto', background: t.cardAlt, borderRadius: 10, padding: '10px 13px', border: `1px solid ${t.border}` }}>
                                         <p style={{ fontSize: 10, color: t.textMuted, marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
@@ -343,22 +328,18 @@ function PatientsSection({ t, hospitalId, accent, externalSearch = '' }) {
     );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   APPOINTMENTS SECTION
-   Doctors, nurses, and receptionists can create appointments.
-   Supports filtering by status and live search.
-───────────────────────────────────────────────────────────── */
+
 function AppointmentsSection({ t, hospitalId, accent, isMobile, role, externalSearch = '' }) {
     const [appointments, setAppointments] = useState([]);
-    const [patients, setPatients]         = useState([]);
-    const [doctors, setDoctors]           = useState([]);
-    const [loading, setLoading]           = useState(true);
-    const [filter, setFilter]             = useState('All');
-    const [search, setSearch]             = useState(externalSearch);
-    const [showAdd, setShowAdd]           = useState(false);
-    const [submitting, setSubmitting]     = useState(false);
-    const [formError, setFormError]       = useState('');
-    const [toast, setToast]               = useState(null);
+    const [patients, setPatients] = useState([]);
+    const [doctors, setDoctors] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState('All');
+    const [search, setSearch] = useState(externalSearch);
+    const [showAdd, setShowAdd] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [formError, setFormError] = useState('');
+    const [toast, setToast] = useState(null);
     const [form, setForm] = useState({ patientId: '', doctorId: '', appointmentDate: '', appointmentTime: '', reason: '', notes: '' });
 
     // Only these roles can create or modify appointments
@@ -446,8 +427,8 @@ function AppointmentsSection({ t, hospitalId, accent, isMobile, role, externalSe
     const counts = { scheduled: 0, completed: 0, cancelled: 0 };
     appointments.forEach(a => { if (counts[a.status] !== undefined) counts[a.status]++; });
 
-    const inputStyle  = { width: '100%', background: t.input, border: `1px solid ${t.border}`, borderRadius: 10, padding: '10px 14px', color: t.text, fontSize: 13, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' };
-    const labelStyle  = { display: 'block', fontSize: 12, fontWeight: 600, color: t.textSub, marginBottom: 6 };
+    const inputStyle = { width: '100%', background: t.input, border: `1px solid ${t.border}`, borderRadius: 10, padding: '10px 14px', color: t.text, fontSize: 13, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' };
+    const labelStyle = { display: 'block', fontSize: 12, fontWeight: 600, color: t.textSub, marginBottom: 6 };
 
     return (
         <div>
@@ -472,9 +453,9 @@ function AppointmentsSection({ t, hospitalId, accent, isMobile, role, externalSe
             {/* Status summary cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
                 {[
-                    { label: 'Scheduled', count: counts.scheduled, color: AMBER   },
+                    { label: 'Scheduled', count: counts.scheduled, color: AMBER },
                     { label: 'Completed', count: counts.completed, color: EMERALD },
-                    { label: 'Cancelled', count: counts.cancelled, color: ROSE    },
+                    { label: 'Cancelled', count: counts.cancelled, color: ROSE },
                 ].map(({ label, count, color }) => (
                     <div key={label} style={{ background: t.surface, borderRadius: 14, padding: '16px', border: `1px solid ${t.border}`, borderLeft: `3px solid ${color}` }}>
                         <p style={{ fontSize: 26, fontWeight: 800, color: t.text }}>{count}</p>
@@ -537,8 +518,8 @@ function AppointmentsSection({ t, hospitalId, accent, isMobile, role, externalSe
                                     {[
                                         { label: 'Doctor', value: a.doctor?.fullName },
                                         { label: 'Reason', value: a.reason },
-                                        { label: 'Date',   value: new Date(a.appointmentDate).toLocaleDateString() },
-                                        { label: 'Time',   value: a.appointmentTime || '—' },
+                                        { label: 'Date', value: new Date(a.appointmentDate).toLocaleDateString() },
+                                        { label: 'Time', value: a.appointmentTime || '—' },
                                     ].map(({ label, value }) => (
                                         <div key={label} style={{ background: t.cardAlt, borderRadius: 8, padding: '8px 10px', border: `1px solid ${t.border}` }}>
                                             <p style={{ fontSize: 10, color: t.textMuted, marginBottom: 2 }}>{label}</p>
@@ -634,22 +615,18 @@ function AppointmentsSection({ t, hospitalId, accent, isMobile, role, externalSe
     );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   PRESCRIPTIONS SECTION
-   Doctors can issue prescriptions; pharmacists can dispense them.
-   Displayed in a table layout with inline status actions.
-───────────────────────────────────────────────────────────── */
+
 function PrescriptionsSection({ t, hospitalId, accent, isMobile, role, externalSearch = '' }) {
     const [prescriptions, setPrescriptions] = useState([]);
-    const [patients, setPatients]           = useState([]);
-    const [doctors, setDoctors]             = useState([]);
-    const [loading, setLoading]             = useState(true);
-    const [filter, setFilter]               = useState('All');
-    const [search, setSearch]               = useState(externalSearch);
-    const [showAdd, setShowAdd]             = useState(false);
-    const [submitting, setSubmitting]       = useState(false);
-    const [formError, setFormError]         = useState('');
-    const [toast, setToast]                 = useState(null);
+    const [patients, setPatients] = useState([]);
+    const [doctors, setDoctors] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState('All');
+    const [search, setSearch] = useState(externalSearch);
+    const [showAdd, setShowAdd] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [formError, setFormError] = useState('');
+    const [toast, setToast] = useState(null);
     const [form, setForm] = useState({ patientId: '', doctorId: '', medication: '', dosage: '', duration: '', instructions: '' });
 
     // Doctors issue prescriptions; pharmacists can dispense (mark complete)
@@ -758,9 +735,9 @@ function PrescriptionsSection({ t, hospitalId, accent, isMobile, role, externalS
             {/* Summary cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
                 {[
-                    { label: 'Active',    count: counts.active,    color: EMERALD },
-                    { label: 'Dispensed', count: counts.completed, color: BLUE    },
-                    { label: 'Cancelled', count: counts.cancelled, color: ROSE    },
+                    { label: 'Active', count: counts.active, color: EMERALD },
+                    { label: 'Dispensed', count: counts.completed, color: BLUE },
+                    { label: 'Cancelled', count: counts.cancelled, color: ROSE },
                 ].map(({ label, count, color }) => (
                     <div key={label} style={{ background: t.surface, borderRadius: 14, padding: '16px', border: `1px solid ${t.border}`, borderLeft: `3px solid ${color}` }}>
                         <p style={{ fontSize: 26, fontWeight: 800, color: t.text }}>{count}</p>
@@ -929,23 +906,19 @@ function PrescriptionsSection({ t, hospitalId, accent, isMobile, role, externalS
     );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   MEDICAL RECORDS SECTION
-   Doctors, nurses, and lab staff can add records.
-   Each record has a type (lab, imaging, consultation, other).
-───────────────────────────────────────────────────────────── */
+
 function RecordsSection({ t, hospitalId, accent, isMobile, role, externalSearch = '' }) {
-    const [records, setRecords]     = useState([]);
-    const [patients, setPatients]   = useState([]);
-    const [doctors, setDoctors]     = useState([]);
-    const [loading, setLoading]     = useState(true);
-    const [filter, setFilter]       = useState('All');
-    const [search, setSearch]       = useState(externalSearch);
-    const [showAdd, setShowAdd]     = useState(false);
-    const [viewRec, setViewRec]     = useState(null);
+    const [records, setRecords] = useState([]);
+    const [patients, setPatients] = useState([]);
+    const [doctors, setDoctors] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState('All');
+    const [search, setSearch] = useState(externalSearch);
+    const [showAdd, setShowAdd] = useState(false);
+    const [viewRec, setViewRec] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [formError, setFormError] = useState('');
-    const [toast, setToast]         = useState(null);
+    const [toast, setToast] = useState(null);
     const [form, setForm] = useState({ patientId: '', doctorId: '', recordType: 'lab_results', title: '', diagnosis: '', findings: '', notes: '' });
 
     const canCreate = ['doctor', 'lab_staff', 'nurse'].includes(role);
@@ -1068,7 +1041,7 @@ function RecordsSection({ t, hospitalId, accent, isMobile, role, externalSearch 
                             {search ? `No records found for "${search}"` : 'No medical records on file'}
                         </div>
                     ) : filtered.map((r, i) => {
-                        const tc    = TYPE_COLORS[r.recordType] || TYPE_COLORS.other;
+                        const tc = TYPE_COLORS[r.recordType] || TYPE_COLORS.other;
                         const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
                         return (
                             <div key={r.id} style={{ background: t.surface, borderRadius: 16, padding: 16, border: `1px solid ${t.border}`, boxShadow: t.shadow }}>
@@ -1126,12 +1099,12 @@ function RecordsSection({ t, hospitalId, accent, isMobile, role, externalSearch 
                             {(() => { const tc = TYPE_COLORS[viewRec.recordType] || TYPE_COLORS.other; return <span style={{ background: tc.bg, color: tc.text, fontSize: 12, fontWeight: 600, padding: '5px 12px', borderRadius: 8, display: 'inline-block', marginBottom: 14 }}>{tc.label}</span>; })()}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
                                 {[
-                                    { label: 'Patient',    value: viewRec.patient?.fullName },
+                                    { label: 'Patient', value: viewRec.patient?.fullName },
                                     { label: 'Patient No', value: viewRec.patient?.patientNumber },
-                                    { label: 'Doctor',     value: viewRec.doctor?.fullName },
-                                    { label: 'Date',       value: new Date(viewRec.recordDate).toLocaleDateString() },
-                                    { label: 'Diagnosis',  value: viewRec.diagnosis || '—' },
-                                    { label: 'Findings',   value: viewRec.findings  || '—' },
+                                    { label: 'Doctor', value: viewRec.doctor?.fullName },
+                                    { label: 'Date', value: new Date(viewRec.recordDate).toLocaleDateString() },
+                                    { label: 'Diagnosis', value: viewRec.diagnosis || '—' },
+                                    { label: 'Findings', value: viewRec.findings || '—' },
                                 ].map(({ label, value }) => (
                                     <div key={label} style={{ background: t.cardAlt, borderRadius: 10, padding: '11px 13px', border: `1px solid ${t.border}` }}>
                                         <p style={{ fontSize: 11, color: t.textMuted, marginBottom: 3 }}>{label}</p>
@@ -1219,18 +1192,14 @@ function RecordsSection({ t, hospitalId, accent, isMobile, role, externalSearch 
     );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   HOME DASHBOARD
-   Overview cards (totals) and a list of the 4 most recent
-   appointments. Clicking a stat card navigates to that section.
-───────────────────────────────────────────────────────────── */
+
 function HomeDashboard({ t, staff, isDark, roleMeta, hospitalId, onNavigate, isMobile }) {
-    const [stats, setStats]               = useState({ patients: 0, appointments: 0, prescriptions: 0, records: 0 });
+    const [stats, setStats] = useState({ patients: 0, appointments: 0, prescriptions: 0, records: 0 });
     const [recentAppointments, setRecent] = useState([]);
-    const [loading, setLoading]           = useState(true);
+    const [loading, setLoading] = useState(true);
 
     // Pick a greeting based on the current time of day
-    const hour     = new Date().getHours();
+    const hour = new Date().getHours();
     const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
     useEffect(() => {
@@ -1243,10 +1212,10 @@ function HomeDashboard({ t, staff, isDark, roleMeta, hospitalId, onNavigate, isM
             api.records.list(hospitalId),
         ]).then(([pRes, aRes, rxRes, rRes]) => {
             setStats({
-                patients:      (pRes.patients      || []).length,
-                appointments:  (aRes.appointments  || []).length,
+                patients: (pRes.patients || []).length,
+                appointments: (aRes.appointments || []).length,
                 prescriptions: (rxRes.prescriptions || []).length,
-                records:       (rRes.records        || []).length,
+                records: (rRes.records || []).length,
             });
             setRecent((aRes.appointments || []).slice(0, 4));
         }).catch(() => {
@@ -1256,10 +1225,10 @@ function HomeDashboard({ t, staff, isDark, roleMeta, hospitalId, onNavigate, isM
 
     /** Stat cards mapping data to navigable sections */
     const statCards = [
-        { label: 'Patients',      value: stats.patients,      icon: Users,    color: BLUE,   section: 'patients'      },
-        { label: 'Appointments',  value: stats.appointments,  icon: Calendar, color: EMERALD, section: 'appointments' },
-        { label: 'Prescriptions', value: stats.prescriptions, icon: Pill,     color: VIOLET, section: 'prescriptions' },
-        { label: 'Records',       value: stats.records,       icon: FileText, color: AMBER,  section: 'records'       },
+        { label: 'Patients', value: stats.patients, icon: Users, color: BLUE, section: 'patients' },
+        { label: 'Appointments', value: stats.appointments, icon: Calendar, color: EMERALD, section: 'appointments' },
+        { label: 'Prescriptions', value: stats.prescriptions, icon: Pill, color: VIOLET, section: 'prescriptions' },
+        { label: 'Records', value: stats.records, icon: FileText, color: AMBER, section: 'records' },
     ];
 
     return (
@@ -1360,21 +1329,17 @@ function HomeDashboard({ t, staff, isDark, roleMeta, hospitalId, onNavigate, isM
     );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   MY PROFILE
-   Displays the logged-in staff member's information and a
-   button to trigger the Change Password modal.
-───────────────────────────────────────────────────────────── */
+
 function MyProfile({ t, staff, isDark, roleMeta, onChangePw }) {
     const info = [
-        { label: 'Full Name',   value: staff?.fullName || staff?.name || '—', icon: User,       color: NAVY   },
-        { label: 'Employee ID', value: staff?.employeeId || '—',               icon: Shield,     color: ORANGE },
-        { label: 'Role',        value: roleMeta.label,                          icon: Stethoscope, color: roleMeta.accent },
-        { label: 'Department',  value: staff?.department || '—',                icon: BedDouble,  color: CYAN  },
-        { label: 'Specialty',   value: staff?.specialty  || '—',                icon: Activity,   color: EMERALD },
-        { label: 'Phone',       value: staff?.phone      || '—',                icon: Phone,      color: AMBER },
-        { label: 'Email',       value: staff?.email      || '—',                icon: Mail,       color: BLUE  },
-        { label: 'Status',      value: staff?.status     || 'active',           icon: CheckCircle, color: EMERALD },
+        { label: 'Full Name', value: staff?.fullName || staff?.name || '—', icon: User, color: NAVY },
+        { label: 'Employee ID', value: staff?.employeeId || '—', icon: Shield, color: ORANGE },
+        { label: 'Role', value: roleMeta.label, icon: Stethoscope, color: roleMeta.accent },
+        { label: 'Department', value: staff?.department || '—', icon: BedDouble, color: CYAN },
+        { label: 'Specialty', value: staff?.specialty || '—', icon: Activity, color: EMERALD },
+        { label: 'Phone', value: staff?.phone || '—', icon: Phone, color: AMBER },
+        { label: 'Email', value: staff?.email || '—', icon: Mail, color: BLUE },
+        { label: 'Status', value: staff?.status || 'active', icon: CheckCircle, color: EMERALD },
     ];
 
     return (
@@ -1437,48 +1402,44 @@ function MyProfile({ t, staff, isDark, roleMeta, onChangePw }) {
     );
 }
 
-/* ─────────────────────────────────────────────────────────────
-   NAVIGATION CONFIG
-   Each role sees only the sections relevant to their work.
-   `SEARCHABLE_SECTIONS` drives the global search bar routing.
-───────────────────────────────────────────────────────────── */
+
 const NAV_BY_ROLE = {
-    doctor:       [
-        { id: 'home',          label: 'Dashboard',    icon: Home         },
-        { id: 'patients',      label: 'Patients',     icon: Users        },
-        { id: 'appointments',  label: 'Appointments', icon: Calendar     },
-        { id: 'prescriptions', label: 'Prescriptions', icon: Pill        },
-        { id: 'records',       label: 'Records',      icon: FileText     },
-        { id: 'profile',       label: 'Profile',      icon: User         },
-    ],
-    nurse:        [
-        { id: 'home',         label: 'Dashboard',    icon: Home     },
-        { id: 'patients',     label: 'Patients',     icon: Users    },
+    doctor: [
+        { id: 'home', label: 'Dashboard', icon: Home },
+        { id: 'patients', label: 'Patients', icon: Users },
         { id: 'appointments', label: 'Appointments', icon: Calendar },
-        { id: 'records',      label: 'Records',      icon: FileText },
-        { id: 'profile',      label: 'Profile',      icon: User     },
+        { id: 'prescriptions', label: 'Prescriptions', icon: Pill },
+        { id: 'records', label: 'Records', icon: FileText },
+        { id: 'profile', label: 'Profile', icon: User },
     ],
-    pharmacist:   [
-        { id: 'home',          label: 'Dashboard',    icon: Home         },
+    nurse: [
+        { id: 'home', label: 'Dashboard', icon: Home },
+        { id: 'patients', label: 'Patients', icon: Users },
+        { id: 'appointments', label: 'Appointments', icon: Calendar },
+        { id: 'records', label: 'Records', icon: FileText },
+        { id: 'profile', label: 'Profile', icon: User },
+    ],
+    pharmacist: [
+        { id: 'home', label: 'Dashboard', icon: Home },
         { id: 'prescriptions', label: 'Prescriptions', icon: ClipboardList },
-        { id: 'patients',      label: 'Patients',     icon: Users        },
-        { id: 'profile',       label: 'Profile',      icon: User         },
+        { id: 'patients', label: 'Patients', icon: Users },
+        { id: 'profile', label: 'Profile', icon: User },
     ],
-    lab_staff:    [
-        { id: 'home',     label: 'Dashboard', icon: Home     },
-        { id: 'records',  label: 'Records',   icon: FileText },
-        { id: 'patients', label: 'Patients',  icon: Users    },
-        { id: 'profile',  label: 'Profile',   icon: User     },
+    lab_staff: [
+        { id: 'home', label: 'Dashboard', icon: Home },
+        { id: 'records', label: 'Records', icon: FileText },
+        { id: 'patients', label: 'Patients', icon: Users },
+        { id: 'profile', label: 'Profile', icon: User },
     ],
     receptionist: [
-        { id: 'home',       label: 'Dashboard',   icon: Home       },
+        { id: 'home', label: 'Dashboard', icon: Home },
         { id: 'appointments', label: 'Appointments', icon: Calendar },
-        { id: 'patients',   label: 'Patients',    icon: Users      },
-        { id: 'profile',    label: 'Profile',     icon: User       },
-        { id: 'billing',    label: 'Billing',     icon: CreditCard },
-        { id: 'admissions', label: 'Admissions',  icon: BedDouble  },
-        { id: 'queue',      label: 'Queue',       icon: Users      },
-        { id: 'lab',        label: 'Lab',         icon: Microscope },
+        { id: 'patients', label: 'Patients', icon: Users },
+        { id: 'profile', label: 'Profile', icon: User },
+        { id: 'billing', label: 'Billing', icon: CreditCard },
+        { id: 'admissions', label: 'Admissions', icon: BedDouble },
+        { id: 'queue', label: 'Queue', icon: Users },
+        { id: 'lab', label: 'Lab', icon: Microscope },
     ],
 };
 
@@ -1494,22 +1455,22 @@ export default function StaffDashboard() {
     const navigate = useNavigate();
 
     // Persist theme preference in localStorage
-    const [isDark, setIsDark]           = useState(() => localStorage.getItem('theme') === 'dark');
-    const [staff, setStaff]             = useState(null);
-    const [section, setSection]         = useState('home');
-    const [isMobile, setIsMobile]       = useState(false);
-    const [mobileMenu, setMobileMenu]   = useState(false);
+    const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') === 'dark');
+    const [staff, setStaff] = useState(null);
+    const [section, setSection] = useState('home');
+    const [isMobile, setIsMobile] = useState(false);
+    const [mobileMenu, setMobileMenu] = useState(false);
 
     // Entrance animation state flags
-    const [headerIn, setHeaderIn]       = useState(false);
-    const [navMounted, setNavMounted]   = useState(false);
+    const [headerIn, setHeaderIn] = useState(false);
+    const [navMounted, setNavMounted] = useState(false);
 
     const [showChangePw, setShowChangePw] = useState(false);
-    const [searchQuery, setSearchQuery]   = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
 
     // Trigger entrance animations on mount
     useEffect(() => {
-        setTimeout(() => setHeaderIn(true),  50);
+        setTimeout(() => setHeaderIn(true), 50);
         setTimeout(() => setNavMounted(true), 150);
     }, []);
 
@@ -1540,15 +1501,15 @@ export default function StaffDashboard() {
     }, []);
 
     // Derive role metadata and navigation items from the stored user object
-    const rawRole  = (staff?.role || 'doctor').toLowerCase().replace(/\s+/g, '_');
+    const rawRole = (staff?.role || 'doctor').toLowerCase().replace(/\s+/g, '_');
     const roleMeta = ROLE_META[rawRole] || ROLE_META.doctor;
     const navItems = NAV_BY_ROLE[rawRole] || NAV_BY_ROLE.doctor;
 
     // Mobile: first 4 nav items in the bottom bar, rest behind "More"
     const BOTTOM_NAV = navItems.slice(0, 4);
-    const MORE_NAV   = navItems.slice(4);
+    const MORE_NAV = navItems.slice(4);
 
-    const t          = isDark ? themes.dark : themes.light;
+    const t = isDark ? themes.dark : themes.light;
     const hospitalId = staff?.hospital_id;
 
     /** Toggle between light and dark theme and broadcast the change */
@@ -1562,8 +1523,7 @@ export default function StaffDashboard() {
     /** Clear all auth data and redirect to staff login */
     const handleLogout = () => {
         ['token', 'user', 'userRole'].forEach(k => localStorage.removeItem(k));
-        window.dispatchEvent(new Event('authChange'));
-        navigate('/stafflogin');
+        window.location.href = '/stafflogin';
     };
 
     /**
@@ -1595,17 +1555,17 @@ export default function StaffDashboard() {
     const renderSection = () => {
         const externalSearch = SEARCHABLE_SECTIONS.includes(section) ? searchQuery : '';
         switch (section) {
-            case 'home':          return <HomeDashboard        {...sharedProps} staff={staff} onNavigate={goTo} />;
-            case 'patients':      return <PatientsSection      {...sharedProps} externalSearch={externalSearch} />;
-            case 'appointments':  return <AppointmentsSection  {...sharedProps} externalSearch={externalSearch} />;
+            case 'home': return <HomeDashboard        {...sharedProps} staff={staff} onNavigate={goTo} />;
+            case 'patients': return <PatientsSection      {...sharedProps} externalSearch={externalSearch} />;
+            case 'appointments': return <AppointmentsSection  {...sharedProps} externalSearch={externalSearch} />;
             case 'prescriptions': return <PrescriptionsSection {...sharedProps} externalSearch={externalSearch} />;
-            case 'records':       return <RecordsSection       {...sharedProps} externalSearch={externalSearch} />;
-            case 'profile':       return <MyProfile t={t} staff={staff} isDark={isDark} roleMeta={roleMeta} onChangePw={() => setShowChangePw(true)} />;
-            case 'billing':       return <BillingSection       {...sharedProps} externalSearch={externalSearch} />;
-            case 'admissions':    return <AdmissionsSection    {...sharedProps} externalSearch={externalSearch} />;
-            case 'queue':         return <QueueSection         {...sharedProps} />;
-            case 'lab':           return <LabRequestsSection   {...sharedProps} externalSearch={externalSearch} />;
-            default:              return <HomeDashboard        {...sharedProps} staff={staff} onNavigate={goTo} />;
+            case 'records': return <RecordsSection       {...sharedProps} externalSearch={externalSearch} />;
+            case 'profile': return <MyProfile t={t} staff={staff} isDark={isDark} roleMeta={roleMeta} onChangePw={() => setShowChangePw(true)} />;
+            case 'billing': return <BillingSection       {...sharedProps} externalSearch={externalSearch} />;
+            case 'admissions': return <AdmissionsSection    {...sharedProps} externalSearch={externalSearch} />;
+            case 'queue': return <QueueSection         {...sharedProps} />;
+            case 'lab': return <LabRequestsSection   {...sharedProps} externalSearch={externalSearch} />;
+            default: return <HomeDashboard        {...sharedProps} staff={staff} onNavigate={goTo} />;
         }
     };
 
@@ -1775,7 +1735,7 @@ export default function StaffDashboard() {
                             {isDark ? <Sun size={16} /> : <Moon size={16} />}
                         </button>
 
-                        <NotificationsPanel isDark={isDark} onNavigate={goTo} onCountChange={() => {}} />
+                        <NotificationsPanel isDark={isDark} onNavigate={goTo} onCountChange={() => { }} />
 
                         {/* Current user pill */}
                         <div
@@ -1802,7 +1762,7 @@ export default function StaffDashboard() {
                 </header>
 
                 {/* ── Scrollable main area ── */}
-                {/* overflow: visible so fixed-position modals inside sections can escape */}
+
                 <main style={{ flex: 1, minHeight: 0, overflow: 'visible' }}>
                     <div style={{ height: '100%', overflowY: 'auto', overflowX: 'hidden', padding: isMobile ? '14px 12px 80px' : '24px' }}>
                         {/* key={section} remounts the section on tab change, triggering fadeUp */}

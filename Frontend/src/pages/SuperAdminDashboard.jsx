@@ -8,9 +8,9 @@ import {
 
 /* ─── Brand tokens ─────────────────────────────────────────────────────────── */
 const T = {
-  navy:      '#0A1A3F',
-  softNavy:  '#1F2A44',
-  orange:    '#FF5A1F',
+  navy: '#0A1A3F',
+  softNavy: '#1F2A44',
+  orange: '#FF5A1F',
   lightGray: '#F5F7FA',
 };
 
@@ -78,10 +78,10 @@ const responsiveStyles = `
 
 /* ─── Stat palette ──────────────────────────────────────────────────────────── */
 const statColors = {
-  blue:   { bg: '#eff6ff', fg: '#1d4ed8' },
+  blue: { bg: '#eff6ff', fg: '#1d4ed8' },
   yellow: { bg: '#fffbeb', fg: '#b45309' },
-  green:  { bg: '#f0fdf4', fg: '#15803d' },
-  red:    { bg: '#fff1f2', fg: '#be123c' },
+  green: { bg: '#f0fdf4', fg: '#15803d' },
+  red: { bg: '#fff1f2', fg: '#be123c' },
   purple: { bg: '#faf5ff', fg: '#7e22ce' },
   indigo: { bg: '#eef2ff', fg: '#4338ca' },
 };
@@ -89,8 +89,8 @@ const statColors = {
 /* ─── Status badge ──────────────────────────────────────────────────────────── */
 const statusBadgeStyle = (status) => {
   const map = {
-    pending:   { bg: '#fff7ed', color: '#c2410c', border: '#fed7aa' },
-    approved:  { bg: '#f0fdf4', color: '#166534', border: '#bbf7d0' },
+    pending: { bg: '#fff7ed', color: '#c2410c', border: '#fed7aa' },
+    approved: { bg: '#f0fdf4', color: '#166534', border: '#bbf7d0' },
     suspended: { bg: '#fff1f2', color: '#9f1239', border: '#fecdd3' },
   };
   const s = map[status] || map.pending;
@@ -111,8 +111,10 @@ function StatCard({ icon, label, value, color, highlight }) {
       border: `1.5px solid ${highlight ? T.orange : '#e4e9f2'}`,
       boxShadow: highlight ? `0 0 0 3px ${T.orange}22` : '0 1px 4px rgba(10,26,63,0.06)',
     }}>
-      <div style={{ width: 38, height: 38, borderRadius: 10, background: bg, color: fg,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+      <div style={{
+        width: 38, height: 38, borderRadius: 10, background: bg, color: fg,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12
+      }}>
         {icon}
       </div>
       <div style={{ fontSize: 24, fontWeight: 800, color: T.navy, letterSpacing: '-0.03em', lineHeight: 1, marginBottom: 3 }}>
@@ -127,9 +129,11 @@ function StatCard({ icon, label, value, color, highlight }) {
 
 function ActionBtn({ style, onClick, icon, label }) {
   return (
-    <button style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px',
+    <button style={{
+      display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px',
       border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 12.5, cursor: 'pointer',
-      transition: 'all .15s', ...style }} onClick={onClick}>
+      transition: 'all .15s', ...style
+    }} onClick={onClick}>
       {icon} {label}
     </button>
   );
@@ -140,18 +144,20 @@ function HospitalModal({ hospital, onClose, onApprove, onReject, onSuspend, onRe
   if (!hospital) return null;
 
   const rows = [
-    { key: 'Hospital Name',  val: hospital.name,                     icon: <Building2 size={14}/> },
-    { key: 'Type',           val: `${hospital.type} Hospital`,       icon: <FileText size={14}/> },
-    { key: 'Status',         val: <span style={statusBadgeStyle(hospital.status)}>{hospital.status}</span> },
-    { key: 'Administrator',  val: hospital.admin,                    icon: <User size={14}/> },
-    { key: 'Email',          val: hospital.email,                    icon: <Mail size={14}/> },
-    { key: 'Phone',          val: hospital.phone,                    icon: <Phone size={14}/> },
-    { key: 'Address',        val: hospital.address,                  icon: <MapPin size={14}/> },
-    { key: 'License No.',    val: hospital.license,                  icon: <Hash size={14}/> },
-    { key: 'Total Patients', val: (hospital.patientCount || 0).toLocaleString(), icon: <Users size={14}/> },
-    { key: 'Staff Count',    val: hospital.staffCount || 0,          icon: <Activity size={14}/> },
-    { key: 'Registered',     val: new Date(hospital.createdAt).toLocaleDateString('en-US',
-        { year: 'numeric', month: 'long', day: 'numeric' }),         icon: <Calendar size={14}/> },
+    { key: 'Hospital Name', val: hospital.name, icon: <Building2 size={14} /> },
+    { key: 'Type', val: `${hospital.type} Hospital`, icon: <FileText size={14} /> },
+    { key: 'Status', val: <span style={statusBadgeStyle(hospital.status)}>{hospital.status}</span> },
+    { key: 'Administrator', val: hospital.admin, icon: <User size={14} /> },
+    { key: 'Email', val: hospital.email, icon: <Mail size={14} /> },
+    { key: 'Phone', val: hospital.phone, icon: <Phone size={14} /> },
+    { key: 'Address', val: hospital.address, icon: <MapPin size={14} /> },
+    { key: 'License No.', val: hospital.license, icon: <Hash size={14} /> },
+    { key: 'Total Patients', val: (hospital.patientCount || 0).toLocaleString(), icon: <Users size={14} /> },
+    { key: 'Staff Count', val: hospital.staffCount || 0, icon: <Activity size={14} /> },
+    {
+      key: 'Registered', val: new Date(hospital.createdAt).toLocaleDateString('en-US',
+        { year: 'numeric', month: 'long', day: 'numeric' }), icon: <Calendar size={14} />
+    },
   ];
 
   return (
@@ -159,8 +165,10 @@ function HospitalModal({ hospital, onClose, onApprove, onReject, onSuspend, onRe
       <div className="sa-modal" onClick={e => e.stopPropagation()}>
         <div className="sa-modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 42, height: 42, borderRadius: 11, background: `${T.navy}12`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.navy }}>
+            <div style={{
+              width: 42, height: 42, borderRadius: 11, background: `${T.navy}12`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.navy
+            }}>
               <Building2 size={20} />
             </div>
             <div>
@@ -172,9 +180,11 @@ function HospitalModal({ hospital, onClose, onApprove, onReject, onSuspend, onRe
               </div>
             </div>
           </div>
-          <button onClick={onClose} style={{ background: '#f0f3f9', border: 'none', borderRadius: 8,
+          <button onClick={onClose} style={{
+            background: '#f0f3f9', border: 'none', borderRadius: 8,
             width: 34, height: 34, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: '#5a6a8a', flexShrink: 0 }}>
+            cursor: 'pointer', color: '#5a6a8a', flexShrink: 0
+          }}>
             <X size={16} />
           </button>
         </div>
@@ -189,9 +199,9 @@ function HospitalModal({ hospital, onClose, onApprove, onReject, onSuspend, onRe
                 <span className="sa-modal-val">
                   {typeof val === 'string' || typeof val === 'number'
                     ? <span style={{ display: 'flex', alignItems: 'center', gap: 5, justifyContent: 'flex-end' }}>
-                        {icon && <span style={{ color: '#8694b2', flexShrink: 0 }}>{icon}</span>}
-                        {val}
-                      </span>
+                      {icon && <span style={{ color: '#8694b2', flexShrink: 0 }}>{icon}</span>}
+                      {val}
+                    </span>
                     : val}
                 </span>
               </div>
@@ -206,26 +216,26 @@ function HospitalModal({ hospital, onClose, onApprove, onReject, onSuspend, onRe
                 <>
                   <ActionBtn style={{ background: '#16a34a', color: '#fff' }}
                     onClick={() => { onApprove(hospital.id); onClose(); }}
-                    icon={<CheckCircle2 size={14}/>} label="Approve" />
+                    icon={<CheckCircle2 size={14} />} label="Approve" />
                   <ActionBtn style={{ background: '#dc2626', color: '#fff' }}
                     onClick={() => { onReject(hospital.id); onClose(); }}
-                    icon={<XCircle size={14}/>} label="Reject" />
+                    icon={<XCircle size={14} />} label="Reject" />
                 </>
               )}
               {hospital.status === 'approved' && (
                 <ActionBtn style={{ background: T.orange, color: '#fff' }}
                   onClick={() => { onSuspend(hospital.id); onClose(); }}
-                  icon={<Ban size={14}/>} label="Suspend" />
+                  icon={<Ban size={14} />} label="Suspend" />
               )}
               {hospital.status === 'suspended' && (
                 <ActionBtn style={{ background: '#16a34a', color: '#fff' }}
                   onClick={() => { onReactivate(hospital.id); onClose(); }}
-                  icon={<CheckCircle2 size={14}/>} label="Reactivate" />
+                  icon={<CheckCircle2 size={14} />} label="Reactivate" />
               )}
               {hospital.status === 'pending' && (
                 <ActionBtn style={{ background: 'transparent', color: '#dc2626', border: '1.5px solid #fecaca' }}
                   onClick={() => { onReject(hospital.id); onClose(); }}
-                  icon={<Trash2 size={14}/>} label="Delete" />
+                  icon={<Trash2 size={14} />} label="Delete" />
               )}
             </div>
           </div>
@@ -245,13 +255,17 @@ function HospitalCard({ hospital, onApprove, onReject, onSuspend, onReactivate, 
     }}>
       <div className="sa-card-header">
         <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flex: 1, minWidth: 0 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: `${T.navy}12`, flexShrink: 0,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.navy }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 12, background: `${T.navy}12`, flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', color: T.navy
+          }}>
             <Building2 size={20} />
           </div>
           <div style={{ minWidth: 0 }}>
-            <div className="sa-card-title" style={{ fontSize: 17, fontWeight: 800, color: T.navy,
-              letterSpacing: '-0.02em', marginBottom: 2, wordBreak: 'break-word' }}>
+            <div className="sa-card-title" style={{
+              fontSize: 17, fontWeight: 800, color: T.navy,
+              letterSpacing: '-0.02em', marginBottom: 2, wordBreak: 'break-word'
+            }}>
               {hospital.name}
             </div>
             <div style={{ fontSize: 12, color: '#8694b2', textTransform: 'capitalize', marginBottom: 4, fontWeight: 500 }}>
@@ -271,13 +285,15 @@ function HospitalCard({ hospital, onApprove, onReject, onSuspend, onReactivate, 
       <div className="sa-info-grid">
         {[
           { label: 'Administrator', value: hospital.admin },
-          { label: 'License No.',   value: hospital.license },
-          { label: 'Patients',      value: (hospital.patientCount || 0).toLocaleString() },
-          { label: 'Staff',         value: hospital.staffCount || 0 },
+          { label: 'License No.', value: hospital.license },
+          { label: 'Patients', value: (hospital.patientCount || 0).toLocaleString() },
+          { label: 'Staff', value: hospital.staffCount || 0 },
         ].map(({ label, value }) => (
           <div key={label}>
-            <div style={{ fontSize: 10.5, color: '#8694b2', fontWeight: 600, textTransform: 'uppercase',
-              letterSpacing: '0.06em', marginBottom: 3 }}>{label}</div>
+            <div style={{
+              fontSize: 10.5, color: '#8694b2', fontWeight: 600, textTransform: 'uppercase',
+              letterSpacing: '0.06em', marginBottom: 3
+            }}>{label}</div>
             <div style={{ fontSize: 13.5, fontWeight: 700, color: T.navy }}>{value}</div>
           </div>
         ))}
@@ -288,24 +304,24 @@ function HospitalCard({ hospital, onApprove, onReject, onSuspend, onReactivate, 
         {hospital.status === 'pending' && (
           <>
             <ActionBtn style={{ background: '#16a34a', color: '#fff' }}
-              onClick={() => onApprove(hospital.id)} icon={<CheckCircle2 size={14}/>} label="Approve" />
+              onClick={() => onApprove(hospital.id)} icon={<CheckCircle2 size={14} />} label="Approve" />
             <ActionBtn style={{ background: '#dc2626', color: '#fff' }}
-              onClick={() => onReject(hospital.id)} icon={<XCircle size={14}/>} label="Reject" />
+              onClick={() => onReject(hospital.id)} icon={<XCircle size={14} />} label="Reject" />
           </>
         )}
         {hospital.status === 'approved' && (
           <ActionBtn style={{ background: T.orange, color: '#fff' }}
-            onClick={() => onSuspend(hospital.id)} icon={<Ban size={14}/>} label="Suspend" />
+            onClick={() => onSuspend(hospital.id)} icon={<Ban size={14} />} label="Suspend" />
         )}
         {hospital.status === 'suspended' && (
           <ActionBtn style={{ background: '#16a34a', color: '#fff' }}
-            onClick={() => onReactivate(hospital.id)} icon={<CheckCircle2 size={14}/>} label="Reactivate" />
+            onClick={() => onReactivate(hospital.id)} icon={<CheckCircle2 size={14} />} label="Reactivate" />
         )}
         <ActionBtn style={{ background: 'transparent', color: T.navy, border: '1.5px solid #c8d3e8' }}
-          onClick={() => onView(hospital)} icon={<Eye size={14}/>} label="View Details" />
+          onClick={() => onView(hospital)} icon={<Eye size={14} />} label="View Details" />
         {hospital.status === 'pending' && (
           <ActionBtn style={{ background: 'transparent', color: '#dc2626', border: '1.5px solid #fecaca' }}
-            onClick={() => onReject(hospital.id)} icon={<Trash2 size={14}/>} label="Delete" />
+            onClick={() => onReject(hospital.id)} icon={<Trash2 size={14} />} label="Delete" />
         )}
       </div>
 
@@ -323,10 +339,10 @@ function HospitalCard({ hospital, onApprove, onReject, onSuspend, onReactivate, 
 export default function SuperAdminDashboard() {
   const navigate = useNavigate();
 
-  const [hospitals,    setHospitals]    = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [filter,       setFilter]       = useState('all');
-  const [searchQuery,  setSearchQuery]  = useState('');
+  const [hospitals, setHospitals] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [viewHospital, setViewHospital] = useState(null); // modal state
   const [stats, setStats] = useState({
     total: 0, pending: 0, approved: 0, suspended: 0,
@@ -356,12 +372,12 @@ export default function SuperAdminDashboard() {
         const data = await res.json();
         setHospitals(data.hospitals);
         setStats({
-          total:         data.hospitals.length,
-          pending:       data.hospitals.filter(h => h.status === 'pending').length,
-          approved:      data.hospitals.filter(h => h.status === 'approved').length,
-          suspended:     data.hospitals.filter(h => h.status === 'suspended').length,
+          total: data.hospitals.length,
+          pending: data.hospitals.filter(h => h.status === 'pending').length,
+          approved: data.hospitals.filter(h => h.status === 'approved').length,
+          suspended: data.hospitals.filter(h => h.status === 'suspended').length,
           totalPatients: data.hospitals.reduce((s, h) => s + (h.patientCount || 0), 0),
-          totalStaff:    data.hospitals.reduce((s, h) => s + (h.staffCount  || 0), 0),
+          totalStaff: data.hospitals.reduce((s, h) => s + (h.staffCount || 0), 0),
         });
       } else if (res.status === 401) {
         localStorage.removeItem('token');
@@ -377,7 +393,7 @@ export default function SuperAdminDashboard() {
   const apiAction = async (url, method, successMsg) => {
     try {
       const token = localStorage.getItem('token');
-      const res   = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}${url}`, {
         method,
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -389,37 +405,45 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  const handleApprove    = id => apiAction(`/api/admin/hospitals/${id}/approve`,    'PUT',    d => `✅ ${d.hospital.name} approved! Approval email sent.`);
-  const handleReject     = id => window.confirm('Delete this registration? This cannot be undone.')
-                              && apiAction(`/api/admin/hospitals/${id}`,             'DELETE', d => `🗑️ ${d.hospital.name} deleted. Rejection email sent.`);
-  const handleSuspend    = id => window.confirm('Suspend this hospital?')
-                              && apiAction(`/api/admin/hospitals/${id}/suspend`,     'PUT',    d => `⛔ ${d.hospital.name} suspended. Suspension email sent.`);
-  const handleReactivate = id => apiAction(`/api/admin/hospitals/${id}/reactivate`, 'PUT',    d => `✅ ${d.hospital.name} reactivated. Reactivation email sent.`);
-  const handleLogout     = () => {
+  const handleApprove = id => apiAction(`/api/admin/hospitals/${id}/approve`, 'PUT', d => `✅ ${d.hospital.name} approved! Approval email sent.`);
+  const handleReject = id => window.confirm('Delete this registration? This cannot be undone.')
+    && apiAction(`/api/admin/hospitals/${id}`, 'DELETE', d => `🗑️ ${d.hospital.name} deleted. Rejection email sent.`);
+  const handleSuspend = id => window.confirm('Suspend this hospital?')
+    && apiAction(`/api/admin/hospitals/${id}/suspend`, 'PUT', d => `⛔ ${d.hospital.name} suspended. Suspension email sent.`);
+  const handleReactivate = id => apiAction(`/api/admin/hospitals/${id}/reactivate`, 'PUT', d => `✅ ${d.hospital.name} reactivated. Reactivation email sent.`);
+  const handleLogout = () => {
     ['token', 'user', 'userRole'].forEach(k => localStorage.removeItem(k));
-    navigate('/superadminlogin');
+    window.location.href = '/superadminlogin'; // full reload avoids stale dashboard still fetching with a cleared token
   };
 
   const filtered = hospitals.filter(h => {
     const matchFilter = filter === 'all' || h.status === filter;
     const matchSearch = h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                        h.email.toLowerCase().includes(searchQuery.toLowerCase());
+      h.email.toLowerCase().includes(searchQuery.toLowerCase());
     return matchFilter && matchSearch;
   });
 
   return (
-    <div style={{ minHeight: '100vh', background: T.lightGray,
-      fontFamily: "'DM Sans', 'Helvetica Neue', Arial, sans-serif" }}>
+    <div style={{
+      minHeight: '100vh', background: T.lightGray,
+      fontFamily: "'DM Sans', 'Helvetica Neue', Arial, sans-serif"
+    }}>
       <style>{responsiveStyles}</style>
 
       {/* ── Header ── */}
-      <header style={{ background: T.navy, borderBottom: `3px solid ${T.orange}`,
-        position: 'sticky', top: 0, zIndex: 50, padding: '0 1.5rem' }}>
-        <div className="sa-header-inner" style={{ maxWidth: 1280, margin: '0 auto',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 68 }}>
+      <header style={{
+        background: T.navy, borderBottom: `3px solid ${T.orange}`,
+        position: 'sticky', top: 0, zIndex: 50, padding: '0 1.5rem'
+      }}>
+        <div className="sa-header-inner" style={{
+          maxWidth: 1280, margin: '0 auto',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 68
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 10, background: T.orange,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{
+              width: 40, height: 40, borderRadius: 10, background: T.orange,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+            }}>
               <Shield size={20} color="#fff" />
             </div>
             <div>
@@ -433,15 +457,19 @@ export default function SuperAdminDashboard() {
           </div>
           <div className="sa-header-actions">
             <button className="sa-btn-refresh" onClick={fetchHospitals}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px',
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px',
                 background: T.softNavy, color: 'rgba(255,255,255,0.85)', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
+                borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer'
+              }}>
               <RefreshCw size={14} /> <span>Refresh</span>
             </button>
             <button onClick={handleLogout}
-              style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px',
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '8px 16px',
                 background: T.orange, color: '#fff', border: 'none', borderRadius: 8,
-                fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                fontWeight: 700, fontSize: 13, cursor: 'pointer'
+              }}>
               <LogOut size={14} /> Logout
             </button>
           </div>
@@ -450,40 +478,46 @@ export default function SuperAdminDashboard() {
 
       {/* ── Main ── */}
       <main className="sa-main" style={{ maxWidth: 1280, margin: '0 auto', padding: '2.5rem 1.5rem' }}>
-        <h2 className="sa-page-title" style={{ fontSize: 26, fontWeight: 800, color: T.navy,
-          letterSpacing: '-0.03em', marginBottom: 4 }}>Hospital Management</h2>
+        <h2 className="sa-page-title" style={{
+          fontSize: 26, fontWeight: 800, color: T.navy,
+          letterSpacing: '-0.03em', marginBottom: 4
+        }}>Hospital Management</h2>
         <p style={{ color: '#6b7a99', fontSize: 14, marginBottom: '2rem' }}>
           Review and manage all registered hospitals on the platform
         </p>
 
         {/* Stats */}
         <div className="sa-stats-grid">
-          <StatCard icon={<Building2 size={18}/>}   label="Total Hospitals"  value={stats.total}                          color="blue"   />
-          <StatCard icon={<Clock size={18}/>}        label="Pending Approval" value={stats.pending}                        color="yellow" highlight={stats.pending > 0} />
-          <StatCard icon={<CheckCircle2 size={18}/>} label="Approved"         value={stats.approved}                       color="green"  />
-          <StatCard icon={<Ban size={18}/>}          label="Suspended"        value={stats.suspended}                      color="red"    />
-          <StatCard icon={<Users size={18}/>}        label="Total Patients"   value={stats.totalPatients.toLocaleString()} color="purple" />
-          <StatCard icon={<Activity size={18}/>}     label="Healthcare Staff" value={stats.totalStaff}                     color="indigo" />
+          <StatCard icon={<Building2 size={18} />} label="Total Hospitals" value={stats.total} color="blue" />
+          <StatCard icon={<Clock size={18} />} label="Pending Approval" value={stats.pending} color="yellow" highlight={stats.pending > 0} />
+          <StatCard icon={<CheckCircle2 size={18} />} label="Approved" value={stats.approved} color="green" />
+          <StatCard icon={<Ban size={18} />} label="Suspended" value={stats.suspended} color="red" />
+          <StatCard icon={<Users size={18} />} label="Total Patients" value={stats.totalPatients.toLocaleString()} color="purple" />
+          <StatCard icon={<Activity size={18} />} label="Healthcare Staff" value={stats.totalStaff} color="indigo" />
         </div>
 
         {/* Filter bar */}
         <div className="sa-filter-bar">
           <div className="sa-search-wrap">
-            <Search size={15} style={{ position: 'absolute', left: 12, top: '50%',
-              transform: 'translateY(-50%)', color: '#8694b2', pointerEvents: 'none' }} />
+            <Search size={15} style={{
+              position: 'absolute', left: 12, top: '50%',
+              transform: 'translateY(-50%)', color: '#8694b2', pointerEvents: 'none'
+            }} />
             <input
-              style={{ width: '100%', padding: '9px 14px 9px 38px', border: '1.5px solid #e4e9f2',
+              style={{
+                width: '100%', padding: '9px 14px 9px 38px', border: '1.5px solid #e4e9f2',
                 borderRadius: 9, fontSize: 13.5, color: T.navy, background: T.lightGray, outline: 'none',
-                boxSizing: 'border-box', fontFamily: 'inherit' }}
+                boxSizing: 'border-box', fontFamily: 'inherit'
+              }}
               type="text" placeholder="Search by name or email…"
               value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
           <div className="sa-filter-btns">
             {[
-              { key: 'all',       label: 'All',       count: stats.total,     color: T.navy    },
-              { key: 'pending',   label: 'Pending',   count: stats.pending,   color: '#b45309' },
-              { key: 'approved',  label: 'Approved',  count: stats.approved,  color: '#15803d' },
+              { key: 'all', label: 'All', count: stats.total, color: T.navy },
+              { key: 'pending', label: 'Pending', count: stats.pending, color: '#b45309' },
+              { key: 'approved', label: 'Approved', count: stats.approved, color: '#15803d' },
               { key: 'suspended', label: 'Suspended', count: stats.suspended, color: '#be123c' },
             ].map(({ key, label, count, color }) => (
               <button key={key} onClick={() => setFilter(key)} style={{
@@ -501,9 +535,11 @@ export default function SuperAdminDashboard() {
         {/* Loading */}
         {loading && (
           <div style={{ textAlign: 'center', paddingBottom: '3rem' }}>
-            <div style={{ width: 44, height: 44, border: `4px solid ${T.orange}33`,
+            <div style={{
+              width: 44, height: 44, border: `4px solid ${T.orange}33`,
               borderTop: `4px solid ${T.orange}`, borderRadius: '50%',
-              animation: 'spin 0.8s linear infinite', margin: '3rem auto 1rem' }} />
+              animation: 'spin 0.8s linear infinite', margin: '3rem auto 1rem'
+            }} />
             <p style={{ color: '#8694b2', fontSize: 14 }}>Loading hospitals…</p>
           </div>
         )}
@@ -511,8 +547,10 @@ export default function SuperAdminDashboard() {
         {/* Hospital list */}
         {!loading && (
           filtered.length === 0 ? (
-            <div style={{ background: '#fff', borderRadius: 16, border: '1.5px solid #e4e9f2',
-              padding: '4rem 2rem', textAlign: 'center' }}>
+            <div style={{
+              background: '#fff', borderRadius: 16, border: '1.5px solid #e4e9f2',
+              padding: '4rem 2rem', textAlign: 'center'
+            }}>
               <Building2 size={48} color="#c8d3e8" style={{ margin: '0 auto 1rem', display: 'block' }} />
               <h3 style={{ color: T.navy, fontWeight: 800, fontSize: 18, marginBottom: 6 }}>No hospitals found</h3>
               <p style={{ color: '#8694b2', fontSize: 14 }}>

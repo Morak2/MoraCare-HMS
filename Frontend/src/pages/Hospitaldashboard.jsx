@@ -1,28 +1,11 @@
-/**
- * HospitalDashboard.jsx
- * ─────────────────────────────────────────────────────────────────────────────
- * Main hospital-admin dashboard shell.
- *
- * Responsibilities:
- *   • Layout  – collapsible desktop sidebar + mobile bottom nav + top header
- *   • Routing – renders the correct section component based on `activeSection`
- *   • Search  – desktop SmartSearchBar dropdown / mobile MobileSearchOverlay
- *   • Theme   – dark/light toggle persisted in localStorage
- *   • Auth    – reads the hospital object from localStorage; redirects to
- *               /hospital/auth if no user is found
- *
- * Navigation items are split into two groups:
- *   BOTTOM_NAV_ITEMS – shown directly in the mobile bottom bar (first 4)
- *   MORE_NAV_ITEMS   – accessible via the "More" drawer (rest)
- * ─────────────────────────────────────────────────────────────────────────────
- */
+
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Home, Users, Calendar, Stethoscope, Pill, FileText,
     Settings, LogOut, Activity, Sun, Moon,
-    Menu, ChevronDown, X, MoreHorizontal, KeyRound,
+    Menu, ChevronDown, X, MoreHorizontal, KeyRound, ScanLine,
 } from 'lucide-react';
 import { themes, BLUE, BLUE2, ACCENT } from './theme.js';
 import NotificationsPanel from '../Components/NotificationsPanel';
@@ -34,17 +17,19 @@ import RecordsSection from './Sections/Recordssection.jsx';
 import DashSettings from './Sections/Settings.jsx';
 import DashboardHome from './Sections/Dashboardhome.jsx';
 import PatientQueueSection from './Sections/PatientQueue.jsx';
+import PatientXraySection from './Sections/PatientXray.jsx';
 import { SmartSearchBar, MobileSearchOverlay } from './Sections/SmartSearchBar.jsx';
 import useInactivityTimeout from '../hooks/useInactivityTimeout';
 
 
 // ─── Navigation config ────────────────────────────────────────────────────────
-/** Full list of nav items – order matters for the mobile bottom bar split beloww */
+
 const NAV_ITEMS = [
     { id: 'dashboard', icon: Home, label: 'Dashboard' },
     { id: 'patients', icon: Users, label: 'Patients' },
     { id: 'appointments', icon: Calendar, label: 'Appointments' },
     { id: 'queue', icon: Users, label: 'Queue' },
+    { id: 'xrays', icon: ScanLine, label: 'X-Rays' },
     { id: 'staff', icon: Stethoscope, label: 'Staff' },
     { id: 'pharmacy', icon: Pill, label: 'Pharmacy' },
     { id: 'records', icon: FileText, label: 'Records' },
@@ -59,7 +44,7 @@ const MORE_NAV_ITEMS = NAV_ITEMS.slice(4);
 
 
 // ─── Active pulse dot ─────────────────────────────────────────────────────────
-/** Small animated dot shown next to the active nav item in the sidebar */
+
 function ActivePill() {
     return (
         <span style={{
@@ -79,13 +64,13 @@ export default function HospitalDashboard() {
     // ── UI state ──────────────────────────────────────────────────────────
     const [isDark, setIsDark] = useState(() => localStorage.getItem('theme') === 'dark');
     const [activeSection, setActive] = useState('dashboard');
-    const [transitioning, setTrans] = useState(false);   // section transition animation flag
-    const [sidebarOpen, setSidebar] = useState(true);    // desktop sidebar expanded/collapsed
-    const [mobileSidebar, setMobile] = useState(false);   // mobile sidebar overlay visibility
-    const [moreDrawer, setMoreDrawer] = useState(false);   // mobile "More" bottom drawer
-    const [hospital, setHospital] = useState(null);    // hospital object from localStorage
-    const [searchQuery, setSearch] = useState('');      // search string passed to sections
-    const [searchOpen, setSearchOpen] = useState(false);   // mobile search overlay visibility
+    const [transitioning, setTrans] = useState(false);
+    const [sidebarOpen, setSidebar] = useState(true);
+    const [mobileSidebar, setMobile] = useState(false);
+    const [moreDrawer, setMoreDrawer] = useState(false);
+    const [hospital, setHospital] = useState(null);
+    const [searchQuery, setSearch] = useState('');
+    const [searchOpen, setSearchOpen] = useState(false);   // 
     const [isMobile, setIsMobile] = useState(false);
     const [isTablet, setIsTablet] = useState(false);
 
@@ -131,11 +116,7 @@ export default function HospitalDashboard() {
 
 
     // ── Navigation helper ─────────────────────────────────────────────────
-    /**
-     * Switches the active section with a brief fade-out / fade-in transition.
-     * Also accepts an optional `query` to pre-fill the search bar in the
-     * destination section (used by the SmartSearchBar).
-     */
+
     const navigate_to = (id, query = '') => {
         if (id === activeSection && !query) return;  // already there, nothing to do
 
@@ -169,11 +150,10 @@ export default function HospitalDashboard() {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('userRole');
-        navigate('/hospital/auth');                        // ← navigate FIRST
-        window.dispatchEvent(new Event('authChange'));     // ← then notify navbar
+        window.location.href = '/hospital/auth'; // full reload avoids stale dashboard still fetching with a cleared token
     };
     // ── Section renderer ──────────────────────────────────────────────────
-    /** Props shared by every section component */
+
     const sectionProps = { isDark, t, hospital, isMobile };
 
     const LockedSection = ({ onUpgrade }) => {
@@ -216,6 +196,7 @@ export default function HospitalDashboard() {
             case 'patients': return <Patients        {...sectionProps} externalSearch={searchQuery} />;
             case 'appointments': return <Appointments    {...sectionProps} externalSearch={searchQuery} />;
             case 'queue': return <PatientQueueSection {...sectionProps} />;
+            case 'xrays': return <PatientXraySection {...sectionProps} />;
             case 'staff': return <Staff           {...sectionProps} externalSearch={searchQuery} />;
             case 'pharmacy': return <Pharmacy        {...sectionProps} externalSearch={searchQuery} />;
             case 'records': return <RecordsSection  {...sectionProps} externalSearch={searchQuery} />;
@@ -226,12 +207,7 @@ export default function HospitalDashboard() {
 
 
     // ── Sidebar content ───────────────────────────────────────────────────
-    /**
-     * Shared sidebar markup used for both the desktop aside and the mobile overlay.
-     *
-     * `forceFull` – when true (mobile overlay), always show labels and the
-     *              close (X) button regardless of the desktop `sidebarOpen` state.
-     */
+
     const SidebarContent = ({ forceFull = false }) => {
         const showLabels = forceFull || sidebarOpen;
 
@@ -357,11 +333,7 @@ export default function HospitalDashboard() {
 
 
     // ── Mobile "More" drawer ──────────────────────────────────────────────
-    /**
-     * Bottom sheet shown on mobile when the user taps the "More" button in the
-     * bottom nav. Contains items 5–8 (pharmacy, records, settings, credentials)
-     * plus a logout button.
-     */
+
     const MoreDrawer = () => (
         <>
             {/* Semi-transparent backdrop */}
@@ -582,7 +554,7 @@ export default function HospitalDashboard() {
                                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.08)'}
                                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                             >
-                                {/* Inline SVG to avoid an extra import */}
+
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                                 </svg>
@@ -683,14 +655,14 @@ export default function HospitalDashboard() {
                             );
                         })}
 
-                        {/* "More" button – opens the MoreDrawer for the remaining items */}
+                        {/* "More" button opens the MoreDrawer */}
                         <button
                             onClick={() => setMoreDrawer(true)}
                             style={{
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
                                 padding: '6px 10px', borderRadius: 12,
                                 border: 'none', cursor: 'pointer',
-                                // Highlight the More button if the active section is one of the hidden items
+
                                 background: MORE_NAV_ITEMS.some(i => i.id === activeSection) ? t.active : 'transparent',
                                 color: MORE_NAV_ITEMS.some(i => i.id === activeSection) ? t.activeText : t.textSub,
                                 fontFamily: 'inherit', minWidth: 56, flex: 1,

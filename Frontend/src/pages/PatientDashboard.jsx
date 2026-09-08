@@ -1,23 +1,4 @@
-/**
- * PatientDashboard.jsx
- * ─────────────────────────────────────────────────────────────────────────────
- * Patient-facing dashboard. All data is scoped to the logged-in patient.
- *
- * Shell layout:
- *   • Desktop   – fixed left sidebar + header + scrollable main area
- *   • Mobile    – collapsible sidebar overlay + sticky header + bottom nav bar
- *
- * Sections (rendered in-place, no router):
- *   overview       – greeting card, quick-action tiles, recent appointments,
- *                    health vitals placeholder, daily health tip
- *   appointments   – filterable / searchable appointment list
- *   records        – searchable medical records with a detail modal
- *   prescriptions  – active and past prescription cards
- *   profile        – patient info grid + Change Password trigger
- *
- * API calls all go through `patientApi` helpers defined at the top of the file.
- * ─────────────────────────────────────────────────────────────────────────────
- */
+
 
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -930,8 +911,7 @@ export default function PatientDashboard() {
 
     const handleLogout = () => {
         ['token', 'user', 'userRole'].forEach(k => localStorage.removeItem(k));
-        window.dispatchEvent(new Event('authChange'));
-        navigate('/patientlogin');
+        window.location.href = '/patientlogin'; // full reload avoids stale dashboard still fetching with a cleared token
     };
 
     /** Navigate to a section and optionally clear the search query */
