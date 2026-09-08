@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
     Home, Users, Calendar, Stethoscope, Pill, FileText,
     Settings, LogOut, Activity, Sun, Moon,
-    Menu, ChevronDown, X, MoreHorizontal, KeyRound, ScanLine,
+    Menu, ChevronDown, X, MoreHorizontal, KeyRound,
 } from 'lucide-react';
 import { themes, BLUE, BLUE2, ACCENT } from './theme.js';
 import NotificationsPanel from '../Components/NotificationsPanel';
@@ -17,19 +17,17 @@ import RecordsSection from './Sections/Recordssection.jsx';
 import DashSettings from './Sections/Settings.jsx';
 import DashboardHome from './Sections/Dashboardhome.jsx';
 import PatientQueueSection from './Sections/PatientQueue.jsx';
-import PatientXraySection from './Sections/PatientXray.jsx';
 import { SmartSearchBar, MobileSearchOverlay } from './Sections/SmartSearchBar.jsx';
 import useInactivityTimeout from '../hooks/useInactivityTimeout';
 
 
 // ─── Navigation config ────────────────────────────────────────────────────────
-
+/** Full list of nav items – order matters for the mobile bottom bar split beloww */
 const NAV_ITEMS = [
     { id: 'dashboard', icon: Home, label: 'Dashboard' },
     { id: 'patients', icon: Users, label: 'Patients' },
     { id: 'appointments', icon: Calendar, label: 'Appointments' },
     { id: 'queue', icon: Users, label: 'Queue' },
-    { id: 'xrays', icon: ScanLine, label: 'X-Rays' },
     { id: 'staff', icon: Stethoscope, label: 'Staff' },
     { id: 'pharmacy', icon: Pill, label: 'Pharmacy' },
     { id: 'records', icon: FileText, label: 'Records' },
@@ -44,7 +42,7 @@ const MORE_NAV_ITEMS = NAV_ITEMS.slice(4);
 
 
 // ─── Active pulse dot ─────────────────────────────────────────────────────────
-
+/** Small animated dot shown next to the active nav item in the sidebar */
 function ActivePill() {
     return (
         <span style={{
@@ -70,7 +68,7 @@ export default function HospitalDashboard() {
     const [moreDrawer, setMoreDrawer] = useState(false);
     const [hospital, setHospital] = useState(null);
     const [searchQuery, setSearch] = useState('');
-    const [searchOpen, setSearchOpen] = useState(false);   // 
+    const [searchOpen, setSearchOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isTablet, setIsTablet] = useState(false);
 
@@ -153,7 +151,7 @@ export default function HospitalDashboard() {
         window.location.href = '/hospital/auth'; // full reload avoids stale dashboard still fetching with a cleared token
     };
     // ── Section renderer ──────────────────────────────────────────────────
-
+    /** Props shared by every section component */
     const sectionProps = { isDark, t, hospital, isMobile };
 
     const LockedSection = ({ onUpgrade }) => {
@@ -196,7 +194,6 @@ export default function HospitalDashboard() {
             case 'patients': return <Patients        {...sectionProps} externalSearch={searchQuery} />;
             case 'appointments': return <Appointments    {...sectionProps} externalSearch={searchQuery} />;
             case 'queue': return <PatientQueueSection {...sectionProps} />;
-            case 'xrays': return <PatientXraySection {...sectionProps} />;
             case 'staff': return <Staff           {...sectionProps} externalSearch={searchQuery} />;
             case 'pharmacy': return <Pharmacy        {...sectionProps} externalSearch={searchQuery} />;
             case 'records': return <RecordsSection  {...sectionProps} externalSearch={searchQuery} />;
@@ -554,7 +551,7 @@ export default function HospitalDashboard() {
                                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.08)'}
                                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                             >
-
+                                {/* Inline SVG to avoid an extra import */}
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                     <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
                                 </svg>
@@ -655,14 +652,14 @@ export default function HospitalDashboard() {
                             );
                         })}
 
-                        {/* "More" button opens the MoreDrawer */}
+                        {/* "More" button – opens the MoreDrawer for the remaining items */}
                         <button
                             onClick={() => setMoreDrawer(true)}
                             style={{
                                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
                                 padding: '6px 10px', borderRadius: 12,
                                 border: 'none', cursor: 'pointer',
-
+                                // Highlight the More button if the active section is one of the hidden items
                                 background: MORE_NAV_ITEMS.some(i => i.id === activeSection) ? t.active : 'transparent',
                                 color: MORE_NAV_ITEMS.some(i => i.id === activeSection) ? t.activeText : t.textSub,
                                 fontFamily: 'inherit', minWidth: 56, flex: 1,
