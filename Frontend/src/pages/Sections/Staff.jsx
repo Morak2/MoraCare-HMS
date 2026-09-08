@@ -1,24 +1,3 @@
-/**
- * Staff.jsx
- * ─────────────────────────────────────────────────────────────────────────────
- * Staff Management page.
- *
- * Features:
- *   • Lists all hospital staff in a responsive card grid
- *   • Filter by role (Doctor, Nurse, Pharmacist, Lab Staff, Receptionist)
- *   • Live search with 400 ms debounce
- *   • Add Staff modal   – creates a new staff member and emails them credentials
- *   • View Staff modal  – read-only detail view
- *   • Delete staff      – with a browser confirm dialog
- *
- * Props:
- *   isDark         – boolean, dark mode flag
- *   t              – theme token object
- *   hospital       – hospital object; hospital.id is required for API calls
- *   isMobile       – boolean, adjusts layout for small screens
- *   externalSearch – string, pre-filled search query (e.g. from the global search bar)
- * ─────────────────────────────────────────────────────────────────────────────
- */
 
 import { useState, useEffect } from 'react';
 import { UserPlus, Search, X, Mail, Phone, Trash2, Eye, Loader, AlertCircle } from 'lucide-react';
@@ -110,6 +89,7 @@ export default function Staff({ isDark, t, hospital, isMobile, externalSearch = 
     const [search, setSearch]       = useState(externalSearch);  // search text box value
     const [filterRole, setFilter]   = useState('All');    // active role filter tab
     const [showAdd, setShowAdd]     = useState(false);    // Add Staff modal visibility
+    const [newCredentials, setNewCredentials] = useState(null); // {email, tempPassword} shown once after creating staff
     const [viewStaff, setViewStaff] = useState(null);     // staff member open in View modal (null = closed)
     const [submitting, setSubmit]   = useState(false);    // Add form submit spinner
     const [formError, setFormError] = useState('');       // Add form inline error
@@ -230,14 +210,15 @@ export default function Staff({ isDark, t, hospital, isMobile, externalSearch = 
             setSubmit(true);
             setFormError('');
 
-            await staffAPI.create({ ...form, hospitalId });
+            const result = await staffAPI.create({ ...form, hospitalId });
 
             // Close modal and reset form
             setShowAdd(false);
+            setNewCredentials({ email: form.email, tempPassword: result.tempPassword });
             setForm({ fullName: '', email: '', role: 'doctor', department: '', specialty: '', phone: '' });
 
             loadStaff();
-            showToast('✅ Staff member added! Their login credentials have been sent to their email.');
+            showToast('✅ Staff member added! Save their login details from the box shown.');
         } catch (err) {
             setFormError(err.message || 'Could not add the staff member. Please try again.');
         } finally {
@@ -478,6 +459,42 @@ export default function Staff({ isDark, t, hospital, isMobile, externalSearch = 
                 </div>
             )}
 
+
+            {/* ── New Staff Credentials Modal (shown once, since email may not be configured) ── */}
+            {newCredentials && (
+                <div
+                    onClick={e => e.target === e.currentTarget && setNewCredentials(null)}
+                    style={modalOverlay}
+                >
+                    <div style={modalBox(440)}>
+                        <div style={{ padding: '16px 20px', borderBottom: `1px solid ${t.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: t.card, borderRadius: '20px 20px 0 0' }}>
+                            <div style={{ fontWeight: 700, fontSize: 16, color: t.text }}>Staff Login Details</div>
+                            <button onClick={() => setNewCredentials(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: t.textSub }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+                        <div style={{ padding: 20 }}>
+                            <p style={{ fontSize: 13, color: t.textSub, marginBottom: 16 }}>
+                                Share these with the staff member. This is shown only once — an email was also attempted, but if it doesn't arrive, use these instead.
+                            </p>
+                            <div style={{ background: t.inputBg || t.bg, border: `1px solid ${t.border}`, borderRadius: 12, padding: 14, marginBottom: 8 }}>
+                                <div style={{ fontSize: 12, color: t.textSub, marginBottom: 4 }}>Email</div>
+                                <div style={{ fontSize: 14, fontWeight: 600, color: t.text, fontFamily: 'monospace' }}>{newCredentials.email}</div>
+                            </div>
+                            <div style={{ background: t.inputBg || t.bg, border: `1px solid ${t.border}`, borderRadius: 12, padding: 14 }}>
+                                <div style={{ fontSize: 12, color: t.textSub, marginBottom: 4 }}>Temporary Password</div>
+                                <div style={{ fontSize: 14, fontWeight: 600, color: t.text, fontFamily: 'monospace' }}>{newCredentials.tempPassword}</div>
+                            </div>
+                            <button
+                                onClick={() => setNewCredentials(null)}
+                                style={{ marginTop: 16, width: '100%', padding: '10px 0', borderRadius: 10, border: 'none', background: T.orange, color: '#fff', fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                Done
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ── Add Staff Modal ── */}
             {showAdd && (
